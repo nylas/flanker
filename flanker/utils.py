@@ -1,52 +1,31 @@
 # coding:utf-8
+"""
+Utility functions and classes used by flanker.
+"""
+
 import re
 import chardet
 
 from functools import wraps
 from flanker.mime.message import errors
 
-'''
-Utility functions and classes used by flanker.
-'''
+# allows, \t\n\v\f\r (0x09-0x0d)
+CONTROL_CHARS = ''.join(map(unichr,
+                            range(0, 9) + range(14, 32) + range(127, 160)))
+CONTROL_CHAR_RE = re.compile('[%s]' % re.escape(CONTROL_CHARS))
 
-def _guess_and_convert(value):
-    charset = chardet.detect(value)
-
-    if not charset["encoding"]:
-        raise errors.DecodingError("Failed to guess encoding for %s" %(value, ))
-
-    try:
-        value = value.decode(charset["encoding"], "replace")
-        return value
-    except (UnicodeError, LookupError) as e:
-        raise errors.DecodingError(str(e))
-
-def _make_unicode(value, charset=None):
-    if isinstance(value, unicode):
-        return value
-
-    try:
-        if charset:
-            value = value.decode(charset, "strict")
-            return value
-        else:
-            value = value.decode("utf-8", "strict")
-            return value
-    except (UnicodeError, LookupError):
-        value = _guess_and_convert(value)
-
-    return value
 
 def to_unicode(value, charset=None):
     value = _make_unicode(value, charset)
     return unicode(value.encode("utf-8", "strict"), "utf-8", 'strict')
 
+
 def to_utf8(value, charset=None):
-    '''
+    """
     Safely returns a UTF-8 version of a given string
     >>> utils.to_utf8(u'hi')
         'hi'
-    '''
+    """
 
     value = _make_unicode(value, charset)
 
@@ -54,7 +33,7 @@ def to_utf8(value, charset=None):
 
 
 def is_pure_ascii(value):
-    '''
+    """
     Determines whether the given string is a pure ascii
     string
     >>> utils.is_pure_ascii(u"Cаша")
@@ -63,7 +42,7 @@ def is_pure_ascii(value):
         True
     >>> utils.is_pure_ascii("Alice")
         True
-    '''
+    """
 
     if value is None:
         return False
@@ -113,6 +92,32 @@ def metrics_wrapper():
     return decorate
 
 
-# allows, \t\n\v\f\r (0x09-0x0d)
-CONTROL_CHARS = ''.join(map(unichr, range(0, 9) + range(14, 32) + range(127, 160)))
-CONTROL_CHAR_RE = re.compile('[%s]' % re.escape(CONTROL_CHARS))
+def _guess_and_convert(value):
+    charset = chardet.detect(value)
+
+    if not charset["encoding"]:
+        raise errors.DecodingError("Failed to guess encoding for %s" %(value, ))
+
+    try:
+        value = value.decode(charset["encoding"], "replace")
+        return value
+    except (UnicodeError, LookupError) as e:
+        raise errors.DecodingError(str(e))
+
+
+def _make_unicode(value, charset=None):
+    if isinstance(value, unicode):
+        return value
+
+    try:
+        if charset:
+            value = value.decode(charset, "strict")
+            return value
+        else:
+            value = value.decode("utf-8", "strict")
+            return value
+    except (UnicodeError, LookupError):
+        value = _guess_and_convert(value)
+
+    return value
+For
