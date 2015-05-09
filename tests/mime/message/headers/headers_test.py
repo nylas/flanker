@@ -186,3 +186,8 @@ def test_folding_combinations():
     eq_('sasha  continued      line', headers['To'])
     eq_('single line  ', headers['From'])
     eq_("hello, how are you today?", headers['Subject'])
+
+def test_folding_beginning():
+    headers = MimeHeaders.from_stream(StringIO("Message-Id:\r\n  <12345.67890.abcdef@example.com>\r\nSubject:\n Hello world!"))
+    eq_('<12345.67890.abcdef@example.com>', headers['Message-Id'])
+    eq_('Hello world!', headers['Subject'])

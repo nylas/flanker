@@ -63,6 +63,14 @@ def enclosed_message_test():
     pbody = unicode(pbody, 'utf-8')
     eq_(pbody, body)
 
+def folded_header_test():
+    message = scan(YANDEX_FBL)
+    message_ids = []
+    for part in message.walk():
+        message_ids.append(part.headers.get('Message-Id'))
+    ok_(
+      '<20150507224033.26918.68726.WyJmYTkxYyIsICJqZXNzZS5zcGVhcnNAeWFuZGV4LnJ1IiwgIjYiXQ==@ninomail.com>' in
+        message_ids )
 
 def torture_message_test():
     message = scan(TORTURE)

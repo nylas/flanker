@@ -68,6 +68,7 @@ BZ2_ATTACHMENT  = open(fixture_file("messages/bz2-attachment.eml")).read()
 
 AOL_FBL = open(fixture_file("messages/complaints/aol.eml")).read()
 YAHOO_FBL = open(fixture_file("messages/complaints/yahoo.eml")).read()
+YANDEX_FBL = open(fixture_file("messages/complaints/yandex.eml")).read()
 NOTIFICATION = open(fixture_file("messages/bounce/no-mx.eml")).read()
 DASHED_BOUNDARIES = open(
     fixture_file("messages/dashed-boundaries.eml")).read()

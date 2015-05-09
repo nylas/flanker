@@ -1,0 +1,75 @@
+X-Envelope-From: <fblbounces@senderscore.net>
+Received: from mra-fbl.returnpath.net (178.128-26.29.45.66.in-addr.arpa
+ [66.45.29.178]) by mxa.mailgun.org with ESMTP id 554bedb9.509cc30-worker2;
+ Thu, 07 May 2015 22:56:57 -0000 (UTC)
+Received: from poma02.lan.returnpath.net (poma02.lan.returnpath.net
+ [10.2.0.110])	by mra-fbl.returnpath.net (Postfix) with ESMTP id
+ D2AF060EC3	for <abuse@ninomail.com>; Thu, 7 May 2015 16:56:56 -0600 (MDT)
+Received: by poma02.lan.returnpath.net (Postfix, from userid 106706)	id
+ CCDE0606B8; Thu, 7 May 2015 16:56:56 -0600 (MDT)
+Content-Transfer-Encoding: binary
+Content-Type: multipart/report; boundary="_----------=_143103941614362206216"; report-type="feedback-report"
+Mime-Version: 1.0
+X-Mailer: MIME::Lite 3.029 (F2.84; T2.04; A2.12; B3.13; Q3.13)
+Date: Thu, 7 May 2015 16:56:56 -0600
+Subject: Yandex Abuse Report
+To: abuse@ninomail.com
+From: feedbackloop@yandexfbl.senderscore.net
+Message-Id: <20150507225656.CCDE0606B8@poma02.lan.returnpath.net>
+X-Mailgun-Incoming: Yes
+X-Mailgun-Sflag: No
+X-Mailgun-Sscore: 0.0
+X-Mailgun-Spf: Neutral
+
+--_----------=_143103941614362206216
+Content-Disposition: inline
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+
+This is a Yandex email abuse report for an email message received from IP 209.61.154.10 on Thu, 7 May 2015 22:40:35 +0000
+
+
+--_----------=_143103941614362206216
+Content-Disposition: inline
+Content-Transfer-Encoding: 7bit
+Content-Type: message/feedback-report
+
+User-Agent: ReturnPathFBL/1.0
+Abuse-Type: complaint
+Arrival-Date: Thu, 7 May 2015 22:40:35 +0000
+Feedback-Type: abuse
+Version: 1
+Source-IP: 209.61.154.10
+Original-Rcpt-To: ca2b45ef141c63af66829a2f346c832b@email.xxx
+Original-Mail-From: bounce+1845b0.6-jesse.spears=yandex.ru@ninomail.com
+Reported-Domain: email.xxx
+
+--_----------=_143103941614362206216
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+Content-Type: message/rfc822
+
+Received: from <ca2b45ef141c63af66829a2f346c832b> by <removed> with LMTP id
+  NES2c9pP for <<removed@email.xxx>>; Fri, 8 May 2015 01:40:36 +0300
+Received: from dfw-p10.ninomail.com (dfw-p10.ninomail.com [209.61.154.10])
+  by <ca2b45ef141c63af66829a2f346c832b> (nwsmtp/Yandex) with ESMTPS id
+  j5tvOam3Pn-eZCKEBtr; Fri,  8 May 2015 01:40:35 +0300 (using TLSv1.2 with
+  cipher AES128-SHA (128/128 bits)) (Client certificate not present)
+Authentication-Results: <ca2b45ef141c63af66829a2f346c832b>; spf=pass
+  (<removed>: domain of ninomail.com designates 209.61.154.10 as permitted
+  sender) <removed> dkim=pass header.i=@ninomail.com
+Received: by luna.mailgun.net with HTTP; Thu, 07 May 2015 22:40:33 +0000
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ascii"
+Subject: Complaint test
+From: jesse@ninomail.com
+Message-Id:
+  <20150507224033.26918.68726.WyJmYTkxYyIsICJqZXNzZS5zcGVhcnNAeWFuZGV4LnJ1IiwgIjYiXQ==@ninomail.com>
+Date: Thu, 07 May 2015 22:40:33 +0000
+Return-Path: bounce+1845b0.6-jesse.spears=yandex.ru@ninomail.com
+Content-Transfer-Encoding: 7bit
+To: ca2b45ef141c63af66829a2f346c832b@email.xxx
+
+<body removed>
+
+--_----------=_143103941614362206216--
