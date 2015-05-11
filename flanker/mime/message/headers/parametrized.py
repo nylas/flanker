@@ -211,7 +211,9 @@ def parameter(ptype, key, value):
 
 def is_quoted(part):
     part = get_value(part)
-    return part[0] == '"' if part else False
+    if not part or len(part) < 2:
+        return False
+    return part[0] == '"' and part[-1] == '"'
 
 
 def is_new_style(parameter):
@@ -302,7 +304,7 @@ newStyleParameter = re.compile(r"""
              [\x21\x23-\x5b\x5d-\x7e\ \t]*
              |
              (?:\\[\x21-\x7e\t\ ])
-          )+"
+          )+"?
        )
      |
      # any (US-ASCII) CHAR except SPACE, CTLs, or tspecials

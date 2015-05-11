@@ -143,6 +143,13 @@ def test_empty_charset():
     eq_(u"", message.headers['Content-Type'].params['charset'])
 
 
+def test_dangling_open_boundary_quotes():
+    message = scan(OPEN_BDRY_QUOTES)
+    eq_(u'"177Q53QS2GMY53=_?:',
+        message.headers['Content-Type'].params['boundary'])
+    eq_(2, len(message.parts))
+
+
 def test_non_ascii_from():
     message = scan(FROM_ENCODING)
     eq_(u'"Ingo Lütkebohle" <ingo@blank.pages.de>', message.headers.get('from'))
