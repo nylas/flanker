@@ -70,8 +70,14 @@ def _make_unicode(value, charset=None):
 
 
 def to_unicode(value, charset=None):
-    value = _make_unicode(value, charset)
-    return unicode(value.encode("utf-8", "strict"), "utf-8", "strict")
+    try:
+        conv_value = _make_unicode(value, charset)
+        return unicode(conv_value.encode("utf-8", "strict"), "utf-8", "strict")
+    except UnicodeDecodeError:
+        # If decoding fails here, it's likely the given charset is wrong
+        # e.g. says base64 but is actually ascii
+        other_conv = _guess_and_convert_with(value)
+        return unicode(other_conv.encode("utf-8", "strict"), "utf-8", "strict")
 
 
 def to_utf8(value, charset=None):
