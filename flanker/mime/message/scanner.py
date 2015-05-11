@@ -353,7 +353,7 @@ _RE_TOKENIZER = re.compile(
 
         # The optional field folded part starts from a newline followed by one
         # or more spaces and field value symbols (can not be empty).
-        (?:(?:\r\n|\n)[ \t]+[\x20-\x7e \t]+)*
+        (?:(?:\r*\n)[ \t]+[\x20-\x7e \t]+)*
     )
     |
     (?P<boundary>
