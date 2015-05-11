@@ -1,0 +1,40 @@
+From: alice@example.com
+To: bob@example.com
+Content-Type: multipart/alternative;
+ 
+	boundary="----=_NextPart_000_1AA9_01D01EAD.3CEC02A0"
+To: bob@example.com
+
+
+------=_NextPart_000_1AA9_01D01EAD.3CEC02A0
+
+Content-Type: text/plain;
+	
+	charset="windows-1251"
+
+Content-Transfer-Encoding: quoted-printable
+
+
+=CE=C1=DF=C7=C0=D2=C5DE!=20
+
+
+
+------=_NextPart_000_1AA9_01D01EAD.3CEC02A0
+
+Content-Type: text/html;
+	
+	charset="windows-1251"
+
+Content-Transfer-Encoding: quoted-printable
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+
+<DIV>Something Else</DIV></BODY></HTML>
+
+------=_NextPart_000_1AA9_01D01EAD.3CEC02A0--
+
+

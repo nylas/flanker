@@ -150,6 +150,14 @@ def test_dangling_open_boundary_quotes():
     eq_(2, len(message.parts))
 
 
+def test_multiline_content_type():
+    message = scan(MULTILINE_CONTENT_TYPE)
+    eq_(u'multipart/alternative',
+        message.headers['Content-Type'])
+    eq_(u'----=_NextPart_000_1AA9_01D01EAD.3CEC02A0',
+        message.headers['Content-Type'].params['boundary'])
+
+
 def test_non_ascii_from():
     message = scan(FROM_ENCODING)
     eq_(u'"Ingo Lütkebohle" <ingo@blank.pages.de>', message.headers.get('from'))
