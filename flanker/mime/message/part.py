@@ -61,7 +61,7 @@ class Stream(object):
         return self.stream.read(self.end - self._body_start + 1)
 
     def _load_headers(self):
-        if self._headers is None:
+        if self._headers is None and self.start is not None:
             self.stream.seek(self.start)
             self._headers = headers.MimeHeaders.from_stream(self.stream)
             self._body_start = self.stream.tell()
