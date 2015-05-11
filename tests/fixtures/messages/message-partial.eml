@@ -1,0 +1,48 @@
+Date: Mon, 1 Jan 2015 01:33:00 -0800
+To: alice@example.com
+Content-Type: multipart/report; report-type=delivery-status;
+    boundary="201502280600257"
+Subject: Returned mail: Requested action not taken: mailbox unavailable
+MIME-Version: 1.0
+
+--201502280600257
+Content-Type: text/plain
+
+The original message was received at Sat, 28 Feb 2015 06:33:00 -0800
+from bitbogger.example.com [192.168.1.1]
+
+
+
+   ----- The following addresses had permanent fatal errors -----
+<foobar@example.com>
+
+   ----- Transcript of session follows -----
+<<< 550 Domain does not exist.
+
+--201502280600257
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; bitbogger.example.com
+Arrival-Date: Mon, 1 Jan 2015 02:33:00 -0800
+
+Final-Recipient: RFC822; <foobar@example.com>
+Action: failed
+Status: 5.1.1
+Remote-MTA: DNS; ptt.yu
+Diagnostic-Code: SMTP; 550 Domain does not exist.
+Last-Attempt-Date: Sat, 28 Feb 2015 06:33:00 -0800
+
+
+
+--201502280600257
+Content-Type: message/partial
+
+From: a@example.com
+To: b@example.com
+Subject: Partial Message
+Date: Sat, 1 Jan 2015 02:26:37 +0000
+Content-Type: multipart/alternative;
+    boundary="_000_BY2PR01MB556F5BA4B99D280460B6542B5120BY2PR01MB556prodex_"
+MIME-Version: 1.0
+
+--201502280600257--

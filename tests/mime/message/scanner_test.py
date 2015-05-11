@@ -158,6 +158,14 @@ def test_multiline_content_type():
         message.headers['Content-Type'].params['boundary'])
 
 
+def test_message_partial():
+    message = scan(MESSAGE_PARTIAL)
+    eq_(3, len(message.parts))
+    eq_('text/plain', str(message.parts[0].content_type))
+    eq_('message/delivery-status', str(message.parts[1].content_type))
+    eq_('message/partial', str(message.parts[2].content_type))
+
+
 def test_non_ascii_from():
     message = scan(FROM_ENCODING)
     eq_(u'"Ingo Lütkebohle" <ingo@blank.pages.de>', message.headers.get('from'))
