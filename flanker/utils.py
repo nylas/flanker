@@ -42,7 +42,7 @@ def _guess_and_convert_with(value, detector=cchardet):
         raise errors.DecodingError("Failed to guess encoding for %s" % (value,))
 
     try:
-        value = value.decode(charset["encoding"], "replace")
+        value = value.decode(charset["encoding"], "strict")
         return value
 
     except (UnicodeError, LookupError) as e:

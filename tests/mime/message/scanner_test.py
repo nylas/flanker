@@ -166,6 +166,16 @@ def test_message_partial():
     eq_('message/partial', str(message.parts[2].content_type))
 
 
+def test_emoji_message():
+    message = scan(EMOJI_MESSAGE)
+    img = u'OutlookEmoji-\xf0\x9f\x98\x8a.png'
+
+    eq_(img, message.parts[1].headers['Content-Description'])
+    eq_(img,
+        message.parts[1].headers['Content-Disposition'].params['filename'])
+
+
+
 def test_non_ascii_from():
     message = scan(FROM_ENCODING)
     eq_(u'"Ingo Lütkebohle" <ingo@blank.pages.de>', message.headers.get('from'))

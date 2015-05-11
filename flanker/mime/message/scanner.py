@@ -24,8 +24,8 @@ def scan(string):
         return traverse(Start(), TokensIterator(tokens, string))
     except DecodingError:
         raise
-    except Exception:
-        raise DecodingError("Malformed MIME message"), None, sys.exc_info()[2]
+    except Exception as e:
+        raise DecodingError("Malformed MIME message somewhere {}".format(e)), None, sys.exc_info()[2]
 
 
 def traverse(pointer, iterator, parent=None):
@@ -74,17 +74,77 @@ def traverse(pointer, iterator, parent=None):
         # some boundary, how could we parse it otherwise?
         boundary = content_type.get_boundary()
         if not boundary:
-            raise DecodingError(
-                "Multipart message without boundary")
 
+            # Bugfix for incomplete attached messages
+            if parent and parent.is_message_container():
+                return traverse(pointer, iterator, parent)
+
+
+            # Sometimes the boundary tokens are not redefined in the MIME body,
+            # so we need to look in the first content type.
+            cts = filter(lambda x: isinstance(x, ContentType), iterator.tokens)
+
+            # Multipart lies. We actually only have one part here
+            if len(cts) == 1:
+                while True:
+                    iterator.check()
+                    end = iterator.next()
+                    if not end.is_content_type():
+                        break
+                return make_part(
+                    content_type=token,
+                    start=pointer,
+                    end=end,
+                    iterator=iterator,
+                    parent=parent)
+
+
+            # Make sure this only applies to the first one
+            if not cts.index(content_type) == 1:
+                # import pdb; pdb.set_trace()
+                raise DecodingError(
+                    "Multipart message without boundary")
+
+            # Set boundry as that in the headers, and content_type as the next
+            # one that appears, which is the real first part
+            boundary = cts[0].get_boundary()
+            content_type = cts[2]
+
+
+        # original_token = token
         parts = deque()
         token = iterator.next()
 
         # we are expecting first boundary for multipart message
         # something is broken otherwise
         if not token.is_boundary() or token != boundary:
+
+            its_the_end = False
+
+            # Turns out this is a multipart with a single part. That's OK.
+            if token.is_end():
+                its_the_end = True
+
+            # We've reached the end of the enclosed message... wrap it up
+            elif parent and parent.is_message_container():
+                its_the_end = True
+
+            # End of a delivery status container demarked by parent boundry
+            elif parent.is_delivery_status() and \
+                parent.get_boundary() == token:
+                its_the_end = True
+
+            if its_the_end:
+                return make_part(
+                    content_type=content_type,
+                    start=pointer,
+                    end=token,
+                    iterator=iterator,
+                    parent=parent)
+
+
             raise DecodingError(
-                "Multipart message without starting boundary")
+                "Multipart message without starting boundary -- failed cks")
 
         while True:
             token = iterator.current()
@@ -349,7 +409,7 @@ _RE_TOKENIZER = re.compile(
         ^content-type:
 
         # The field value consists of printable US-ASCII chars, spaces and tabs.
-        [\x21-\x7e\ \t]+
+        [\W][^\n\r]+
 
         # The optional field folded part starts from a newline followed by one
         # or more spaces and field value symbols (can not be empty).
@@ -441,7 +501,7 @@ def _filter_false_tokens(tokens):
             # Only the first content-type header in a headers section is valid.
             if current_content_type or current_section != _SECTION_HEADERS:
                 continue
-    
+
             current_content_type = token
             boundaries.append(token.get_boundary())
 
@@ -489,7 +549,7 @@ def _filter_false_tokens(tokens):
             # to identify a place where a header section completes and a body
             # section starts.
             continue
-        
+
         else:
             raise DecodingError("Unknown token")
 

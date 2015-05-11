@@ -7,6 +7,7 @@ from flanker.mime.message.headers import encodedword
 from flanker.mime.message import charsets
 from collections import deque
 from itertools import groupby
+from flanker.utils import _guess_and_convert
 
 
 def decode(header):
@@ -99,8 +100,14 @@ def concatenate(parts):
         # old-style parameters do not support any continuations
         return encodedword.mime_to_unicode(get_value(part))
     else:
-        return u"".join(
-            decode_new_style(p) for p in partition(parts))
+        try:
+            return u"".join(
+                decode_new_style(p) for p in partition(parts))
+        except UnicodeDecodeError:
+            parts = [(x, y, _guess_and_convert(p)) for (x, y, p) in parts]
+            return u"".join(
+                decode_new_style(p) for p in partition(parts))
+
 
 
 def match_parameter(rest):
@@ -301,7 +308,7 @@ newStyleParameter = re.compile(r"""
      (?P<value>
        (?:
          "(?:
-             [\x21\x23-\x5b\x5d-\x7e\ \t]*
+             [\x21\x23-\x5b\x5d-\x7e\ \t\W]*
              |
              (?:\\[\x21-\x7e\t\ ])
           )+"?

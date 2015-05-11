@@ -46,6 +46,7 @@ OPEN_BDRY_QUOTES = open(fixture_file("messages/open-bdry-quotes.eml")).read()
 MULTILINE_CONTENT_TYPE = open(
     fixture_file("messages/multiline-content-type.eml")).read()
 MESSAGE_PARTIAL = open(fixture_file("messages/message-partial.eml")).read()
+EMOJI_MESSAGE = open(fixture_file("messages/emoji-message.eml")).read()
 NO_CTYPE = open(fixture_file("messages/no-ctype.eml")).read()
 APACHE_MIME_MESSAGE_NEWS = open(fixture_file("messages/apache-message-news-mime.eml")).read()
 ENCLOSED = open(fixture_file("messages/enclosed.eml")).read()

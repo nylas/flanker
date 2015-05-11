@@ -1,0 +1,36 @@
+Date: Mon, 1 Jan 2015 01:33:00 -0800
+To: alice@example.com
+Content-Type: multipart/mixed; boundary="9ca4f9e3b740436bb761d3f9aae5fae9"
+Subject: Sup emoji
+MIME-Version: 1.0
+
+--9ca4f9e3b740436bb761d3f9aae5fae9
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ascii"
+Content-Transfer-Encoding: 7bit
+
+hello, world. this is emoji comin atcha
+
+--9ca4f9e3b740436bb761d3f9aae5fae9
+Mime-Version: 1.0
+Content-Type: image/png; name="OutlookEmoji-😊.png"
+Content-Description: OutlookEmoji-😊.png
+Content-Disposition: inline; filename="OutlookEmoji-😊.png"; size=768;
+    creation-date="Wed, 08 Apr 2015 00:00:15 GMT";
+    modification-date="Wed, 08 Apr 2015 00:00:15 GMT"
+Content-ID: <0811848b-6d6c-4ae1-962f-1eb3284bce88>
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+bWFnZVJlYWR5ccllPAAAAYpJREFUeNpi/P//PwO1ACM2wf9njBWAVD4QBwCxApLUAyDeAMQTGU3O
+PkDRA3QUIxaD+oFUAREOaQQa2IDTMKBB84FUAgk+WwA0MBFmGBOaixJIDKYEoD6465igBjkge+3C
+rW94TUCTr4eGMdxl8TCZxMYHDIZR1xk2HPiA1SCQOEgepA4J5CMbFgAPhM1vwfTFW9+xGgYTh6lD
+1s8IdKIAkH4PEz1w9jOYVpBiZ1CQZMMw7MHzXwwPnv0Esx2MeRESxmcYWYCUAbJiFAVYAMgCbJbA
+vPmAWjmACZqS4aHdOOs5wdgEBcWE5a8Y0HIGPAIOwETtjXkYJqIqxAAgeQM1ThTzkQ2biB5mC7a8
+xZ7kgeICvMzoYTsRJaMDY3U9chIBpaMHz34xxPsKgwMcFIsLgckB5KL+YllkgyYAg6oQJW9Ck8h+
+5NgFhd3GAx/humAGI2cGIHYEGvYBW0YHGTgf2YX4MjkQF4IMwlkEIeXVfByGwsqzAwTLMywGg7wN
+cvED9AIR3TCAAAMAqh+p+YMVeBQAAAAASUVORK5CYII=
+
+
+--9ca4f9e3b740436bb761d3f9aae5fae9--
+
