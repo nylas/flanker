@@ -447,6 +447,14 @@ def _filter_false_tokens(tokens):
         elif isinstance(token, Boundary):
             value = token.value[2:]
 
+            try:
+                value = value.decode('ascii')
+            except UnicodeDecodeError as e:
+                # Multipart delimiters and header fields are always 7-bit ASCII
+                # Without this check, we may get warnings in implicit casting
+                # during the inclusion check next (i.e. comparison)
+                continue
+
             if value in boundaries:
                 token.value = value
                 token.final = False
