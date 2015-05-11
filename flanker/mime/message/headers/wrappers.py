@@ -78,13 +78,15 @@ class ContentType(tuple):
         return self == 'message/external-body'
 
     def is_message_container(self):
-        return self == 'message/rfc822' or self == 'message/news'
+        return self in ['message/rfc822', 'message/news', 'message/partial']
 
     def is_disposition_notification(self):
         return self == 'message/disposition-notification'
 
     def is_delivery_status(self):
-        return self == 'message/delivery-status'
+        return self == 'message/delivery-status' or \
+            (self == 'multipart/report' and \
+             self.params.get('report-type') == 'delivery-status')
 
     def is_feedback_report(self):
         return self == 'message/feedback-report'
