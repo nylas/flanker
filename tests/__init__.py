@@ -41,6 +41,7 @@ IPHONE = open(fixture_file("messages/iphone.eml")).read()
 
 MULTIPART = open(fixture_file("messages/multipart.eml")).read()
 FROM_ENCODING = open(fixture_file("messages/from-encoding.eml")).read()
+EMPTY_CHARSET = open(fixture_file("messages/empty-charset.eml")).read()
 NO_CTYPE = open(fixture_file("messages/no-ctype.eml")).read()
 APACHE_MIME_MESSAGE_NEWS = open(fixture_file("messages/apache-message-news-mime.eml")).read()
 ENCLOSED = open(fixture_file("messages/enclosed.eml")).read()
