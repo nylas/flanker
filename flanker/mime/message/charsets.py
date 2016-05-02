@@ -19,6 +19,9 @@ def convert_to_unicode(charset, value):
     value = to_unicode(value, charset)
     return value
 
+    # cp874 looks to be an alias for windows-874
+    if "windows-874" == charset.lower():
+        return "cp874"
 
 def _ensure_charset(charset):
     charset = charset.lower()
