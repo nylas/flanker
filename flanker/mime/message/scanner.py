@@ -28,7 +28,7 @@ def scan(string):
         raise DecodingError("Malformed MIME message"), None, sys.exc_info()[2]
 
 
-def traverse(pointer, iterator, parent=None):
+def traverse(pointer, iterator, parent=None, ignore_report_rfc=False):
     """Recursive-descendant parser"""
 
     iterator.check()
@@ -80,9 +80,11 @@ def traverse(pointer, iterator, parent=None):
         parts = deque()
         token = iterator.next()
 
+        if ignore_report_rfc and parent and parent.is_message_container():
+            return None
         # we are expecting first boundary for multipart message
         # something is broken otherwise
-        if not token.is_boundary() or token != boundary:
+        elif not token.is_boundary() or token != boundary:
             raise DecodingError(
                 "Multipart message without starting boundary")
 
@@ -128,14 +130,23 @@ def traverse(pointer, iterator, parent=None):
     # a message inside, delimited from parent
     # headers by newline
     elif token.is_message_container():
-        enclosed = traverse(pointer, iterator, token)
-        return make_part(
-            content_type=token,
-            start=pointer,
-            end=iterator.current(),
-            iterator=iterator,
-            enclosed=enclosed,
-            parent=parent)
+        if parent.is_delivery_report():
+            # Special case to ignore malformed message from Google
+            ignore_report_rfc = True
+
+        enclosed = traverse(pointer, iterator, token, ignore_report_rfc)
+        kwargs = {
+                'content_type':default_content_type(),
+                'start':pointer,
+                'end':iterator.current(),
+                'iterator':iterator,
+                'parent':parent
+        }
+        if enclosed is not None:
+            kwargs['enclosed'] = enclosed
+            kwargs['content_type'] = token
+
+        return make_part(**kwargs)
 
     # this part contains headers separated by newlines,
     # grab these headers and enclose them in one part
@@ -480,7 +491,7 @@ def _filter_false_tokens(tokens):
             # to identify a place where a header section completes and a body
             # section starts.
             continue
-        
+
         else:
             raise DecodingError("Unknown token")
 
