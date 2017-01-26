@@ -130,7 +130,7 @@ def traverse(pointer, iterator, parent=None, ignore_report_rfc=False):
     # a message inside, delimited from parent
     # headers by newline
     elif token.is_message_container():
-        if parent.is_delivery_report():
+        if parent and parent.is_delivery_report():
             # Special case to ignore malformed message from Google
             ignore_report_rfc = True
 
