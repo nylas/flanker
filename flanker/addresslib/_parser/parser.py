@@ -5,9 +5,7 @@ import ply.yacc as yacc
 
 from flanker.addresslib._parser.lexer import lexer, tokens
 
-logging.basicConfig()
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 Mailbox = namedtuple('Mailbox', ['display_name', 'local_part', 'domain'])
 Url     = namedtuple('Url',     ['address'])
