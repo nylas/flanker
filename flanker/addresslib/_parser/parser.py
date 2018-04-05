@@ -1,9 +1,8 @@
-import logging
-from collections import namedtuple
-
 import ply.yacc as yacc
+from lexer import tokens, lexer
+from collections import namedtuple
+import logging
 
-from flanker.addresslib._parser.lexer import lexer, tokens
 
 log = logging.getLogger(__name__)
 
@@ -155,35 +154,31 @@ def p_error(p):
 
 
 # Build the parsers
-log.debug('building mailbox parser')
+
+log.info('building mailbox parser')
 mailbox_parser = yacc.yacc(start='mailbox',
                            errorlog=log,
-                           tabmodule='mailbox_parsetab',
-                           debug=False)
+                           tabmodule='mailbox_parsetab')
 
-log.debug('building addr_spec parser')
+log.info('building addr_spec parser')
 addr_spec_parser = yacc.yacc(start='addr_spec',
                              errorlog=log,
-                             tabmodule='addr_spec_parsetab',
-                             debug=False)
+                             tabmodule='addr_spec_parsetab')
 
-log.debug('building url parser')
+log.info('building url parser')
 url_parser = yacc.yacc(start='url',
                        errorlog=log,
-                       tabmodule='url_parsetab',
-                       debug=False)
+                       tabmodule='url_parsetab')
 
-log.debug('building mailbox_or_url parser')
+log.info('building mailbox_or_url parser')
 mailbox_or_url_parser = yacc.yacc(start='mailbox_or_url',
                                   errorlog=log,
-                                  tabmodule='mailbox_or_url_parsetab',
-                                  debug=False)
+                                  tabmodule='mailbox_or_url_parsetab')
 
-log.debug('building mailbox_or_url_list parser')
+log.info('building mailbox_or_url_list parser')
 mailbox_or_url_list_parser = yacc.yacc(start='mailbox_or_url_list',
                                        errorlog=log,
-                                       tabmodule='mailbox_or_url_list_parsetab',
-                                       debug=False)
+                                       tabmodule='mailbox_or_url_list_parsetab')
 
 
 # Interactive prompt for easy debugging
