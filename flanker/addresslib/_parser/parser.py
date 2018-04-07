@@ -155,7 +155,6 @@ def p_error(p):
 
 
 # Build the parsers
-
 log.debug('building mailbox parser')
 mailbox_parser = yacc.yacc(start='mailbox',
                            errorlog=log,
