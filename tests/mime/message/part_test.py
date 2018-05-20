@@ -8,13 +8,13 @@ from nose.tools import eq_, ok_, assert_false, assert_raises, assert_less
 from flanker.mime.create import multipart, text
 from flanker.mime.message.scanner import scan
 from flanker.mime.message.errors import EncodingError, DecodingError
-from flanker.mime.message.part import encode_transfer_encoding, _base64_decode
+from flanker.mime.message.part import encode_transfer_encoding, _base64_decode, encode_body
 from tests import (BILINGUAL, BZ2_ATTACHMENT, ENCLOSED, TORTURE, TORTURE_PART,
                    ENCLOSED_BROKEN_ENCODING, EIGHT_BIT, QUOTED_PRINTABLE,
                    TEXT_ONLY, ENCLOSED_BROKEN_BODY, RUSSIAN_ATTACH_YAHOO,
                    MAILGUN_PIC, MAILGUN_PNG, MULTIPART, IPHONE,
                    SPAM_BROKEN_CTYPE, BOUNCE, NDN, NO_CTYPE, RELATIVE,
-                   MULTI_RECEIVED_HEADERS, OUTLOOK_EXPRESS)
+                   MULTI_RECEIVED_HEADERS, OUTLOOK_EXPRESS, TEXT_LONG_LINE_NO_LINE_BREAKS)
 from tests.mime.message.scanner_test import TORTURE_PARTS, tree_to_string
 from flanker.mime import recover
 
@@ -289,6 +289,14 @@ def ascii_to_quoted_printable_test():
     eq_('iso-8859-1', message.content_type.get_charset())
     eq_('iso-8859-1', message.charset)
     eq_(value, message.body)
+
+
+def long_line_no_line_break_quoted_printable_test():
+    message = scan(TEXT_LONG_LINE_NO_LINE_BREAKS)
+    message._container._body_changed = True
+    assert message.was_changed(ignore_prepends=True)
+    charset, encoding, body = encode_body(message)
+    eq_(len(body.split('\r\n')), 23)
 
 
 # Make sure we can't create a message without headers.

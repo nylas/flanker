@@ -636,7 +636,9 @@ def encode_charset(preferred_charset, text):
 
 def encode_transfer_encoding(encoding, body):
     if encoding == 'quoted-printable':
-        return quopri.encodestring(body, quotetabs=False)
+        body = u'\r\n{}'.format(body)
+        result = quopri.encodestring(body, quotetabs=False)
+        return result[2:]
     elif encoding == 'base64':
         return email.encoders._bencode(body)
     else:

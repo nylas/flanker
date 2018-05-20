@@ -65,6 +65,7 @@ RUSSIAN_ATTACH_YAHOO = open(
 QUOTED_PRINTABLE = open(
     fixture_file("messages/quoted-printable.eml")).read()
 TEXT_ONLY = open(fixture_file("messages/text-only.eml")).read()
+TEXT_LONG_LINE_NO_LINE_BREAKS = open(fixture_file("messages/text-long-line-no-line-breaks.eml")).read()
 MAILGUN_PIC = open(fixture_file("messages/mailgun-pic.eml")).read()
 BZ2_ATTACHMENT  = open(fixture_file("messages/bz2-attachment.eml")).read()
 OUTLOOK_EXPRESS = open(fixture_file("messages/outlook-express.eml")).read()
