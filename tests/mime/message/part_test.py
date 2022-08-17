@@ -1,14 +1,15 @@
 # coding:utf-8
-from email import message_from_string
 from contextlib import closing
-from cStringIO import StringIO
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, assert_less
+from six.moves import StringIO
 
+from flanker import _email
+from flanker.mime import recover
 from flanker.mime.create import multipart, text
+from flanker.mime.message.errors import EncodingError
+from flanker.mime.message.part import _encode_transfer_encoding, _base64_decode
 from flanker.mime.message.scanner import scan
-from flanker.mime.message.errors import EncodingError, DecodingError
-from flanker.mime.message.part import encode_transfer_encoding, _base64_decode
 from tests import (BILINGUAL, BZ2_ATTACHMENT, ENCLOSED, TORTURE, TORTURE_PART,
                    ENCLOSED_BROKEN_ENCODING, EIGHT_BIT, QUOTED_PRINTABLE,
                    TEXT_ONLY, ENCLOSED_BROKEN_BODY, RUSSIAN_ATTACH_YAHOO,
@@ -16,7 +17,6 @@ from tests import (BILINGUAL, BZ2_ATTACHMENT, ENCLOSED, TORTURE, TORTURE_PART,
                    SPAM_BROKEN_CTYPE, BOUNCE, NDN, NO_CTYPE, RELATIVE,
                    MULTI_RECEIVED_HEADERS, OUTLOOK_EXPRESS)
 from tests.mime.message.scanner_test import TORTURE_PARTS, tree_to_string
-from flanker.mime import recover
 
 
 # We can read the headers and access the body without changing a single
@@ -29,7 +29,7 @@ def readonly_immutability_test():
     eq_(BILINGUAL, message.to_string())
 
     message = scan(ENCLOSED)
-    pmessage = message_from_string(ENCLOSED)
+    pmessage = _email.message_from_string(ENCLOSED)
 
     # we can read the headers without changing anything
     eq_(u'"Александр Клижентас☯" <bob@example.com>',
@@ -40,7 +40,7 @@ def readonly_immutability_test():
 
     # we can also read the body without changing anything
     pbody = pmessage.get_payload()[1].get_payload()[0].get_payload()[0].get_payload(decode=True)
-    pbody = unicode(pbody, 'utf-8')
+    pbody = pbody.decode('utf-8')
     eq_(pbody, message.parts[1].enclosed.parts[0].body)
     assert_false(message.was_changed())
     eq_(ENCLOSED, message.to_string())
@@ -202,7 +202,7 @@ def preserve_content_encoding_test_8bit():
 # Make sure that quoted-printable remains quoted-printable.
 def preserve_content_encoding_test_quoted_printable():
     # should remain 8bit
-    unicode_value = u'☯Привет! Как дела? Что делаешь?,\n Что новенького?☯'
+    unicode_value = u'☯Привет! Как дела? Что делаешь?,\r\n Что новенького?☯'
     message = scan(QUOTED_PRINTABLE)
     body = message.parts[0].body
     message.parts[0].body = body + unicode_value
@@ -279,7 +279,7 @@ def set_message_id_test():
 
 
 # Make sure that ascii uprades to quoted-printable if it has long lines.
-def ascii_to_quoted_printable_test():
+def ascii_to_quoted_printable_test_2():
     # contains unicode chars
     message = scan(TEXT_ONLY)
     value = u'Hello, how is it going?' * 100
@@ -351,38 +351,48 @@ def to_string_test():
     ok_(str(scan(TORTURE)))
 
 
-# Yahoo fails with russian attachments.
 def broken_ctype_test():
     message = scan(RUSSIAN_ATTACH_YAHOO)
-    assert_raises(
-        DecodingError, lambda x: [p.headers for p in message.walk()], 1)
+    attachment = message.parts[1]
+    eq_('image/png', attachment.detected_content_type)
+    eq_('png', attachment.detected_subtype)
+    eq_('image', attachment.detected_format)
+    eq_(u'Картинка с очень, очень длинным предлинным именем преименем таким чт�', attachment.detected_file_name)
+    ok_(not attachment.is_body())
+
 
 def read_attach_test():
     message = scan(MAILGUN_PIC)
-    p = (p for p in message.walk() if p.content_type.main == 'image').next()
-    eq_(p.body, MAILGUN_PNG)
+    image_parts = [p for p in message.walk() if p.content_type.main == 'image']
+    eq_(image_parts[0].body, MAILGUN_PNG)
 
 
 def from_python_message_test():
-    python_message = message_from_string(MULTIPART)
+    python_message = _email.message_from_string(MULTIPART)
     message = scan(python_message.as_string())
 
     eq_(python_message['Subject'], message.headers['Subject'])
 
     ctypes = [p.get_content_type() for p in python_message.walk()]
-    ctypes2 = [p.headers['Content-Type'][0] \
-                  for p in message.walk(with_self=True)]
+    ctypes2 = [p.headers['Content-Type'][0]
+               for p in message.walk(with_self=True)]
     eq_(ctypes, ctypes2)
 
-    payloads = [p.get_payload(decode=True) for p in python_message.walk()][1:]
+    payloads = []
+    for p in python_message.walk():
+        payload = p.get_payload(decode=True)
+        if payload:
+            payload = payload.decode('utf-8')
+        payloads.append(payload)
+
     payloads2 = [p.body for p in message.walk()]
 
-    eq_(payloads, payloads2)
+    eq_(payloads[1:], payloads2)
 
 
 def iphone_test():
     message = scan(IPHONE)
-    eq_(u'\n\n\n~Danielle', list(message.walk())[2].body)
+    eq_(u'\r\n\r\n\r\n~Danielle', list(message.walk())[2].body)
 
 
 def content_types_test():
@@ -540,12 +550,15 @@ def message_convert_to_python_test():
     b = message.to_python_message()
 
     payloads = [p.body for p in message.walk()]
-    payloads1 = list(p.get_payload(decode=True) \
-                         for p in a.walk() if not p.is_multipart())
-    payloads2 = list(p.get_payload(decode=True) \
-                         for p in b.walk() if not p.is_multipart())
+    payloads1 = [p.get_payload(decode=True)
+                 for p in a.walk() if not p.is_multipart()]
+    payloads2 = [p.get_payload(decode=True)
+                 for p in b.walk() if not p.is_multipart()]
 
-    eq_(payloads, payloads2)
+    eq_(3, len(payloads))
+    eq_(payloads[0], payloads2[0].decode('utf-8'))
+    eq_(payloads[1], payloads2[1])
+    eq_(payloads[2], payloads2[2].decode('utf-8'))
     eq_(payloads1, payloads2)
 
 
@@ -590,12 +603,14 @@ def read_body_test():
     # correctly
     part = scan(NO_CTYPE)
     eq_(NO_CTYPE, part._container.read_message())
-    eq_("Hello,\nI'm just testing message parsing\n\nBR,\nBob", part._container.read_body())
+    eq_("Hello,\r\nI'm just testing message parsing\r\n\r\nBR,\r\nBob",
+        part._container.read_body())
 
     # multipart/related
     part = scan(RELATIVE)
     eq_(RELATIVE, part._container.read_message())
-    eq_("""This is html and text message, thanks\r\n\r\n-- \r\nRegards,\r\nBob\r\n""", part.parts[0]._container.read_body())
+    eq_("This is html and text message, thanks\r\n\r\n-- \r\nRegards,\r\nBob\r\n",
+        part.parts[0]._container.read_body())
 
     # enclosed
     part = scan(ENCLOSED)
@@ -606,17 +621,20 @@ def read_body_test():
 
 def test_encode_transfer_encoding():
     body = "long line " * 100
-    encoded_body = encode_transfer_encoding('base64', body)
+    encoded_body = _encode_transfer_encoding('base64', body)
     # according to  RFC 5322 line "SHOULD be no more than 78 characters"
     assert_less(max([len(l) for l in encoded_body.splitlines()]), 79)
 
 
 # Test base64 decoder.
-def test__base64_decode():
-    eq_("hello", _base64_decode("aGVs\r\nbG8="))  # valid base64
-    eq_("hello!", _base64_decode("a\x00GVsbG8\t*hx"))  # trim last character
-    eq_("hello", _base64_decode("aGVsb\r\nG8"))  # recover single byte padding
-    eq_("hello!!", _base64_decode("aGVs\rbG8h\nIQ")) # recover 2 bytes padding
+def test_base64_decode():
+    eq_(b"hello", _base64_decode("aGVs\r\nbG8="))  # valid base64
+    eq_(b"hello!", _base64_decode("a\x00GVsbG8\t*hx"))  # trim last character
+    eq_(b"hello", _base64_decode("aGVsb\r\nG8"))  # recover single byte padding
+    eq_(b"hello!!", _base64_decode("aGVs\rbG8h\nIQ")) # recover 2 bytes padding
+    eq_(b"hello!!", _base64_decode("aGЫVs\rЫЫbG8hЫЫ\nЫЫIQ"))
+    eq_(b"hello!!", _base64_decode("ЫaGVsbG8h\nIQЫ"))
+    eq_(b"hello!!", _base64_decode("ЫЫЫЫaGVsЫЫЫЫ\rbG8h\nIQЫЫЫЫ"))
 
 
 # Make sure broken base64 part gets recovered.

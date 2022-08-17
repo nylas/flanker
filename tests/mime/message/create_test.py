@@ -1,18 +1,14 @@
 # coding:utf-8
 
-from nose.tools import *
-from mock import *
-
-import email
 import json
+from email.parser import Parser
 
-from base64 import b64decode
+from nose.tools import *
 
+from flanker import _email
 from flanker.mime import create
 from flanker.mime.message import errors
 from flanker.mime.message.part import MimePart
-from email.parser import Parser
-
 from ... import *
 
 
@@ -29,14 +25,17 @@ def from_python_message_test():
     payloads = [p.get_payload(decode=True) for p in python_message.walk()][1:]
     payloads2 = [p.body for p in message.walk()]
 
-    eq_(payloads, payloads2)
+    eq_(3, len(payloads2))
+    eq_(payloads[0].decode('utf-8'), payloads2[0])
+    eq_(payloads[1], payloads2[1])
+    eq_(payloads[2].decode('utf-8'), payloads2[2])
 
 
 def from_string_message_test():
     message = create.from_string(IPHONE)
     parts = list(message.walk())
     eq_(3, len(parts))
-    eq_(u'\n\n\n~Danielle', parts[2].body)
+    eq_(u'\r\n\r\n\r\n~Danielle', parts[2].body)
 
 
 def from_part_message_simple_test():
@@ -44,7 +43,7 @@ def from_part_message_simple_test():
     parts = list(message.walk())
 
     message = create.from_message(parts[2])
-    eq_(u'\n\n\n~Danielle', message.body)
+    eq_(u'\r\n\r\n\r\n~Danielle', message.body)
 
 
 def message_from_garbage_test():
@@ -75,8 +74,8 @@ def create_singlepart_ascii_long_lines_test():
     eq_("quoted-printable", message2.content_encoding.value)
     eq_(very_long, message2.body)
 
-    message2 = email.message_from_string(message.to_string())
-    eq_(very_long, message2.get_payload(decode=True))
+    message2 = _email.message_from_string(message.to_string())
+    eq_(very_long, message2.get_payload(decode=True).decode('utf-8'))
 
 
 def create_multipart_simple_test():
@@ -95,7 +94,7 @@ def create_multipart_simple_test():
     eq_("Hello", message.parts[0].body)
     eq_("<html>Hello</html>", message.parts[1].body)
 
-    message2 = email.message_from_string(message.to_string())
+    message2 = _email.message_from_string(message.to_string())
     eq_("multipart/mixed", message2.get_content_type())
     eq_("Hello", message2.get_payload()[0].get_payload(decode=False))
     eq_("<html>Hello</html>",
@@ -121,7 +120,7 @@ def create_multipart_with_attachment_test():
     eq_(filename, message2.parts[2].content_type.params['name'])
     ok_(message2.parts[2].is_attachment())
 
-    message2 = email.message_from_string(message.to_string())
+    message2 = _email.message_from_string(message.to_string())
     eq_(3, len(message2.get_payload()))
     eq_(MAILGUN_PNG, message2.get_payload()[2].get_payload(decode=True))
 
@@ -284,24 +283,23 @@ def create_enclosed_nested_test():
 
 
 def guessing_attachments_test():
-    binary = create.binary(
-        "application", 'octet-stream', MAILGUN_PNG, '/home/alex/mailgun.png')
+    binary = create.binary('application', 'octet-stream', MAILGUN_PNG,
+                           '/home/alex/mailgun.png')
     eq_('image/png', binary.content_type)
     eq_('mailgun.png', binary.content_type.params['name'])
 
-    binary = create.binary(
-        "application", 'octet-stream',
-        MAILGUN_PIC, '/home/alex/mailgun.png', disposition='attachment')
+    binary = create.binary('application', 'octet-stream', MAILGUN_PIC,
+                           '/home/alex/mailgun.png', disposition='attachment')
 
     eq_('attachment', binary.headers['Content-Disposition'].value)
     eq_('mailgun.png', binary.headers['Content-Disposition'].params['filename'])
 
-    binary = create.binary(
-        "application", 'octet-stream', NOTIFICATION, '/home/alex/mailgun.eml')
+    binary = create.binary('application', 'octet-stream', NOTIFICATION,
+                           '/home/alex/mailgun.eml')
     eq_('message/rfc822', binary.content_type)
 
-    binary = create.binary(
-        "application", 'octet-stream', MAILGUN_WAV, '/home/alex/audiofile.wav')
+    binary = create.binary('application', 'octet-stream', MAILGUN_WAV,
+                           '/home/alex/audiofile.wav')
     eq_('audio/x-wav', binary.content_type)
 
 
@@ -363,3 +361,16 @@ def create_newlines_in_headers_test():
     text = create.from_string(text.to_string())
     eq_('Hello,newline', text.headers['Subject'])
     eq_(u'Превед, медвед!', text.headers['To'])
+
+
+def test_bug_line_is_too_long():
+    # It was possible to create a message with a very long header value, but
+    # it was impossible to parse such message.
+
+    msg = create.text('plain', 'foo', 'utf-8')
+    msg.headers.add('bar', 'y' * 10000)
+    encoded_msg = msg.to_string()
+    decoded_msg = create.from_string(encoded_msg)
+
+    # When/Then
+    decoded_msg.headers

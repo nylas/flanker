@@ -1,11 +1,14 @@
-import regex as re
 from collections import deque
-from cStringIO import StringIO
-import sys
+from logging import getLogger
+
+import regex as re
+import six
+from six.moves import StringIO
+
+from flanker.mime.message.errors import DecodingError
 from flanker.mime.message.headers import parsing, is_empty, ContentType
 from flanker.mime.message.part import MimePart, Stream
-from flanker.mime.message.errors import DecodingError
-from logging import getLogger
+from flanker.mime.message.utils import to_unicode
 
 log = getLogger(__name__)
 
@@ -14,8 +17,15 @@ def scan(string):
     """Scanner that uses 1 pass to scan the entire message and
     build a message tree"""
 
-    if not isinstance(string, str):
-        raise DecodingError("Scanner works with byte strings only")
+    if six.PY2:
+        if not isinstance(string, six.binary_type):
+            raise DecodingError('Scanner works with binary only')
+    else:
+        if isinstance(string, six.binary_type):
+            string = to_unicode(string)
+
+        if not isinstance(string, six.text_type):
+            raise DecodingError('Cannot scan type %s' % type(string))
 
     tokens = tokenize(string)
     if not tokens:
@@ -24,8 +34,8 @@ def scan(string):
         return traverse(Start(), TokensIterator(tokens, string))
     except DecodingError:
         raise
-    except Exception:
-        raise DecodingError("Malformed MIME message"), None, sys.exc_info()[2]
+    except Exception as cause:
+        raise six.raise_from(DecodingError("Malformed MIME message"), cause)
 
 
 def traverse(pointer, iterator, parent=None, allow_bad_mime=False):
@@ -394,12 +404,15 @@ def tokenize(string):
     """
     Scans the entire message to find all Content-Types and boundaries.
     """
+    if six.PY3 and isinstance(string, six.binary_type):
+        string = string.decode('utf-8')
+
     tokens = deque()
     for m in _RE_TOKENIZER.finditer(string):
         if m.group(_CTYPE):
             name, token = parsing.parse_header(m.group(_CTYPE))
         elif m.group(_BOUNDARY):
-            token = Boundary(m.group(_BOUNDARY).strip("\t\r\n"),
+            token = Boundary(m.group(_BOUNDARY).strip('\t\r\n'),
                              _grab_newline(m.start(), string, -1),
                              _grab_newline(m.end(), string, 1))
         else:
@@ -486,7 +499,7 @@ def _filter_false_tokens(tokens):
             continue
 
         else:
-            raise DecodingError("Unknown token")
+            raise DecodingError('Unknown token')
 
         filtered.append(token)
 
@@ -494,7 +507,7 @@ def _filter_false_tokens(tokens):
 
 
 def _strip_endings(value):
-    if value.endswith("--"):
+    if value.endswith('--'):
         return value[:-2]
     else:
         return value

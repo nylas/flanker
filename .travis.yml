@@ -1,10 +1,10 @@
 language: python
 python:
   - 2.7
+  - 3.6
 install:
-  - pip install -e .[validator]
+  - pip install -e .[cchardet,validator]
   - pip install nose mock coverage coveralls
-script:
-  - nosetests --with-coverage --cover-package=flanker
+script: nosetests --with-coverage --cover-package=flanker
 after_success:
   - coveralls

@@ -1,19 +1,16 @@
-from cStringIO import StringIO
-from contextlib import closing
-from email.generator import Generator
+import chardet as fallback_detector
+import six
+
+# Made cchardet optional according to https://github.com/mailgun/flanker/pull/84
+try:
+    import cchardet as primary_detector
+except ImportError:
+    primary_detector = fallback_detector
+
 from flanker.mime.message import errors
-import cchardet
-import chardet
 
 
-def python_message_to_string(msg):
-    """Converts python message to string in a proper way"""
-    with closing(StringIO()) as fp:
-        g = Generator(fp, mangle_from_=False)
-        g.flatten(msg, unixfrom=False)
-        return fp.getvalue()
-
-def _guess_and_convert_with(value, detector=cchardet):
+def _guess_and_convert_with(value, detector=primary_detector):
     """
     Try to guess the encoding of the passed value with the provided detector
     and decode it.
@@ -32,6 +29,7 @@ def _guess_and_convert_with(value, detector=cchardet):
     except (UnicodeError, LookupError) as e:
         raise errors.DecodingError(str(e))
 
+
 def _guess_and_convert(value):
     """
     Try to guess the encoding of the passed value and decode it.
@@ -40,13 +38,13 @@ def _guess_and_convert(value):
     back to chardet which is much slower.
     """
     try:
-        return _guess_and_convert_with(value, detector=cchardet)
-    except:
-        return _guess_and_convert_with(value, detector=chardet)
+        return _guess_and_convert_with(value, detector=primary_detector)
+    except Exception:
+        return _guess_and_convert_with(value, detector=fallback_detector)
 
 
 def _make_unicode(value, charset=None):
-    if isinstance(value, unicode):
+    if isinstance(value, six.text_type):
         return value
 
     charset = charset or "utf-8"
@@ -59,12 +57,9 @@ def _make_unicode(value, charset=None):
 
 
 def to_utf8(value, charset=None):
-    '''
+    """
     Safely returns a UTF-8 version of a given string
-    >>> utils.to_utf8(u'hi')
-        'hi'
-    '''
-
+    """
     value = _make_unicode(value, charset)
 
     return value.encode("utf-8", "strict")

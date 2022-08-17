@@ -1,4 +1,5 @@
 import collections
+import os
 import redis
 
 
@@ -7,10 +8,15 @@ class RedisCache(collections.MutableMapping):
     RedisCache has the same interface as a dict, but talks to a redis server.
     """
 
-    def __init__(self, host='localhost', port=6379, prefix='mxr:', ttl=604800):
+    def __init__(self, host=None, port=None, prefix='mxr:', ttl=604800):
         self.prefix = prefix
         self.ttl = ttl
-        self.r = redis.StrictRedis(host=host, port=port, db=0)
+
+        host = host or os.environ.get('REDIS_HOST', 'localhost')
+        port = port or os.environ.get('REDIS_PORT', 6379)
+        db = os.environ.get('REDIS_DB', 0)
+        decode_resp = os.environ.get('REDIS_DECODE_RESPONSES', False)
+        self.r = redis.StrictRedis(host=host, port=port, db=db, decode_responses=decode_resp)
 
     def __getitem__(self, key):
         try:

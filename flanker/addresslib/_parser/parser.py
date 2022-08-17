@@ -1,8 +1,9 @@
-import ply.yacc as yacc
-from lexer import tokens, lexer
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
+import ply.yacc as yacc
+
+from flanker.addresslib._parser.lexer import lexer, tokens
 
 log = logging.getLogger(__name__)
 
@@ -154,31 +155,35 @@ def p_error(p):
 
 
 # Build the parsers
-
 log.debug('building mailbox parser')
 mailbox_parser = yacc.yacc(start='mailbox',
                            errorlog=log,
-                           tabmodule='mailbox_parsetab')
+                           tabmodule='mailbox_parsetab',
+                           debug=False)
 
 log.debug('building addr_spec parser')
 addr_spec_parser = yacc.yacc(start='addr_spec',
                              errorlog=log,
-                             tabmodule='addr_spec_parsetab')
+                             tabmodule='addr_spec_parsetab',
+                             debug=False)
 
 log.debug('building url parser')
 url_parser = yacc.yacc(start='url',
                        errorlog=log,
-                       tabmodule='url_parsetab')
+                       tabmodule='url_parsetab',
+                       debug=False)
 
 log.debug('building mailbox_or_url parser')
 mailbox_or_url_parser = yacc.yacc(start='mailbox_or_url',
                                   errorlog=log,
-                                  tabmodule='mailbox_or_url_parsetab')
+                                  tabmodule='mailbox_or_url_parsetab',
+                                  debug=False)
 
 log.debug('building mailbox_or_url_list parser')
 mailbox_or_url_list_parser = yacc.yacc(start='mailbox_or_url_list',
                                        errorlog=log,
-                                       tabmodule='mailbox_or_url_list_parsetab')
+                                       tabmodule='mailbox_or_url_list_parsetab',
+                                       debug=False)
 
 
 # Interactive prompt for easy debugging
@@ -192,16 +197,16 @@ if __name__ == '__main__':
             break
         if s == '': continue
 
-        print '\nTokens list:\n'
+        print('\nTokens list:\n')
         lexer.input(s)
         while True:
             tok = lexer.token()
             if not tok:
                 break
-            print tok
+            print(tok)
 
-        print '\nParsing behavior:\n'
+        print('\nParsing behavior:\n')
         result = mailbox_or_url_list_parser.parse(s, debug=log)
 
-        print '\nResult:\n'
-        print result
+        print('\nResult:\n')
+        print(result)
