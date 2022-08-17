@@ -58,6 +58,10 @@ def _read_header_lines(fp):
     """Read lines with headers until the start of body"""
     lines = deque()
     for line in fp:
+        if len(line) > MAX_LINE_LENGTH:
+            raise DecodingError(
+                "Line is too long: {0}".format(len(line)))
+
         if is_empty(line):
             break
 
